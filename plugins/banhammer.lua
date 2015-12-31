@@ -175,7 +175,7 @@ do
     if msg.from.type == 'user' then
       local post_count = 'user:'..user_id..':floodc'
       local msgs = tonumber(redis:get(post_count) or 0)
-      local text = 'User '..user_id..' is flooding'
+      
       if msgs > NUM_MSG_MAX and not is_sudo(msg) then
         local data = load_data(_config.moderation.data)
         local anti_flood_stat = data[tostring(chat_id)]['settings']['anti_flood']
