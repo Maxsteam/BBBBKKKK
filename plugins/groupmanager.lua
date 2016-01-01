@@ -59,11 +59,11 @@ function run(msg, matches)
   local receiver = get_receiver(msg)
 
   -- create a group
-  if matches[1] == 'mkgroup' and matches[2] and is_admin(msg) then
+  if matches[1] == 'cgp' and matches[2] and is_admin(msg) then
     create_group_chat (msg.from.print_name, matches[2], ok_cb, false)
 	  return 'Group '..string.gsub(matches[2], '_', ' ')..' has been created.'
   -- add a group to be moderated
-  elseif matches[1] == 'addgroup' and is_admin(msg) then
+  elseif matches[1] == 'addgp' and is_admin(msg) then
     if data[tostring(msg.to.id)] then
       return 'Group is already added.'
     end
@@ -84,7 +84,7 @@ function run(msg, matches)
     save_data(_config.moderation.data, data)
     return 'Group has been added.'
   -- remove group from moderation
-  elseif matches[1] == 'remgroup' and is_admin(msg) then
+  elseif matches[1] == 'remgp' and is_admin(msg) then
     if not data[tostring(msg.to.id)] then
       return 'Group is not added.'
     end
@@ -105,13 +105,13 @@ function run(msg, matches)
 
     local settings = data[tostring(msg.to.id)]['settings']
 
-    if matches[1] == 'setabout' and matches[2] and is_mod(msg) then
+    if matches[1] == 'sabout' and matches[2] and is_mod(msg) then
 	    data[tostring(msg.to.id)]['description'] = matches[2]
 	    save_data(_config.moderation.data, data)
 	    return 'Set group description to:\n'..matches[2]
     elseif matches[1] == 'about' then
       return get_description(msg, data)
-    elseif matches[1] == 'setrules' and is_mod(msg) then
+    elseif matches[1] == 'srules' and is_mod(msg) then
 	    data[tostring(msg.to.id)]['rules'] = matches[2]
 	    save_data(_config.moderation.data, data)
 	    return 'Set group rules to:\n'..matches[2]
@@ -291,12 +291,12 @@ function run(msg, matches)
         return nil
       end
 		-- set group name
-		elseif matches[1] == 'setname' and is_mod(msg) then
+		elseif matches[1] == 'sname' and is_mod(msg) then
       settings.set_name = string.gsub(matches[2], '_', ' ')
       save_data(_config.moderation.data, data)
       rename_chat(receiver, settings.set_name, ok_cb, false)
 		-- set group photo
-		elseif matches[1] == 'setphoto' and is_mod(msg) then
+		elseif matches[1] == 'sphoto' and is_mod(msg) then
       settings.set_photo = 'waiting'
       save_data(_config.moderation.data, data)
       return 'Please send me new group photo now'
@@ -364,9 +364,9 @@ return {
   description = 'Plugin to manage group chat.',
   usage = {
     admin = {
-      '!mkgroup <group_name> : Make/create a new group.',
-      '!addgroup : Add group to moderation list.',
-      '!remgroup : Remove group from moderation list.'
+      '!cgp <group_name> : Make/create a new group.',
+      '!addgp : Add group to moderation list.',
+      '!remgp : Remove group from moderation list.'
     },
     moderator = {
       '!group <lock|unlock> bot : {Dis}allow APIs bots.',
@@ -375,10 +375,10 @@ return {
       '!group <lock|unlock> photo : Lock/unlock group photo.',
       '!group settings : Show group settings.',
       '!link <set> : Generate/revoke invite link.',
-      '!setabout <description> : Set group description.',
-      '!setname <new_name> : Set group name.',
-      '!setphoto : Set group photo.',
-      '!setrules <rules> : Set group rules.',
+      '!sabout <description> : Set group description.',
+      '!sname <new_name> : Set group name.',
+      '!sphoto : Set group photo.',
+      '!srules <rules> : Set group rules.',
       '!sticker warn : Sticker restriction, sender will be warned for the first violation.',
       '!sticker kick : Sticker restriction, sender will be kick.',
       '!sticker ok : Disable sticker restriction.'
@@ -391,21 +391,21 @@ return {
   },
   patterns = {
     "^!(about)$",
-    "^!(addgroup)$",
+    "^!(addgp)$",
     "%[(audio)%]",
     "%[(document)%]",
     "^!(group) (lock) (.*)$",
     "^!(group) (settings)$",
     "^!(group) (unlock) (.*)$",
     "^!(link) (.*)$",
-    "^!(mkgroup) (.*)$",
+    "^!(cgp) (.*)$",
     "%[(photo)%]",
-    "^!(remgroup)$",
+    "^!(remgp)$",
     "^!(rules)$",
-    "^!(setabout) (.*)$",
-    "^!(setname) (.*)$",
-    "^!(setphoto)$",
-    "^!(setrules) (.*)$",
+    "^!(sabout) (.*)$",
+    "^!(sname) (.*)$",
+    "^!(sphoto)$",
+    "^!(srules) (.*)$",
     "^!(sticker) (.*)$",
     "^!!tgservice (.+)$",
     "%[(video)%]"
