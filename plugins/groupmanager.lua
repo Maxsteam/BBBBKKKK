@@ -6,7 +6,7 @@ local function export_chat_link_cb(extra, success, result)
   local data = extra.data
   local receiver = get_receiver(msg)
   if success == 0 then
-    return send_large_msg(receiver, 'Cannot generate invite link for this group.\nMake sure you are an admin or a sudoer.')
+    return send_large_msg(receiver, 'نمیتوان لینک ایجاد کرد لطفا به @Bad_bo0y اطلاع دهید')
   end
   data[tostring(msg.to.id)]['link'] = result
   save_data(_config.moderation.data, data)
@@ -36,7 +36,7 @@ end
 local function get_description(msg, data)
   local about = data[tostring(msg.to.id)]['description']
   if not about then
-    return 'No description available.'
+    return 'توضیحاتی درج نشده است'
 	end
   return string.gsub(msg.to.print_name, "_", " ")..':\n\n'..about
 end
@@ -59,13 +59,13 @@ function run(msg, matches)
   local receiver = get_receiver(msg)
 
   -- create a group
-  if matches[1] == 'cgp' and matches[2] and is_admin(msg) then
+  if matches[1] == 'mkgroup' and matches[2] and is_admin(msg) then
     create_group_chat (msg.from.print_name, matches[2], ok_cb, false)
-	  return 'Group '..string.gsub(matches[2], '_', ' ')..' has been created.'
+	  return 'گروه '..string.gsub(matches[2], '_', ' ')..' با موفقیت ساخته شد.'
   -- add a group to be moderated
   elseif matches[1] == 'addgroup' and is_admin(msg) then
     if data[tostring(msg.to.id)] then
-      return 'Group is already added.'
+      return 'گروه از قبل ادد شده است'
     end
     -- create data array in moderation.json
     data[tostring(msg.to.id)] = {
@@ -82,7 +82,7 @@ function run(msg, matches)
         }
       }
     save_data(_config.moderation.data, data)
-    return 'Group has been added.'
+    return 'گروه ادد شد '
   -- remove group from moderation
   elseif matches[1] == 'remgroup' and is_admin(msg) then
     if not data[tostring(msg.to.id)] then
@@ -90,7 +90,7 @@ function run(msg, matches)
     end
     data[tostring(msg.to.id)] = nil
     save_data(_config.moderation.data, data)
-    return 'Group has been removed'
+    return 'گروه حذف شد'
   end
 
   if msg.media and is_chat_msg(msg) and is_mod(msg) then
@@ -117,7 +117,7 @@ function run(msg, matches)
 	    return 'Set group rules to:\n'..matches[2]
     elseif matches[1] == 'rules' then
       if not data[tostring(msg.to.id)]['rules'] then
-        return 'No rules available.'
+        return 'قوانینی موجود نیست'
 	    end
       local rules = data[tostring(msg.to.id)]['rules']
       local rules = string.gsub(msg.to.print_name, '_', ' ')..' rules:\n\n'..rules
@@ -130,7 +130,7 @@ function run(msg, matches)
           local link = data[tostring(msg.to.id)]['link']
           return about.."\n\n"..link
         else
-          return 'Invite link does not exist.\nTry !link set to generate.'
+          return 'لینک ایجاد نشده از !link set برای ایجاد لینک جدید استفاده کنید'
         end
       elseif matches[2] == 'set' and is_mod(msg) then
         msgr = export_chat_link(receiver, export_chat_link_cb, {data=data, msg=msg})
@@ -140,15 +140,15 @@ function run(msg, matches)
       if matches[2] == 'lock' then
         if matches[3] == 'bot' and is_mod(msg) then
 	        if settings.lock_bots == 'yes' then
-            return 'Group is already locked from bots.'
+            return 'قفل ربات فعال است.'
 	        else
             settings.lock_bots = 'yes'
             save_data(_config.moderation.data, data)
-            return 'Group is locked from bots.'
+            return 'قفل ادد کردن ربات فعال شد دیگر نمیتوان ربات ادد کرد بنابراین گروه شما امن تر است.'
 	        end
         elseif matches[3] == 'name' and is_mod(msg) then
 	        if settings.lock_name == 'yes' then
-            return 'Group name is already locked'
+            return 'نام گروه قفل است'
 	        else
             settings.lock_name = 'yes'
             save_data(_config.moderation.data, data)
@@ -158,92 +158,92 @@ function run(msg, matches)
 	        end
         elseif matches[3] == 'member' and is_mod(msg) then
 	        if settings.lock_member == 'yes' then
-            return 'Group members are already locked'
+            return 'قفل نـام گروه فعال است'
 	        else
             settings.lock_member = 'yes'
             save_data(_config.moderation.data, data)
 	        end
-	        return 'Group members has been locked'
+	        return 'قفل ادد کردن ممبر فعال شد دیگر کسی را نمیتوان ادد کرد'
         elseif matches[3] == 'photo' and is_mod(msg) then
 	        if settings.lock_photo == 'yes' then
-            return 'Group photo is already locked'
+            return 'عکس گروه قفل میباشد'
 	        else
             settings.set_photo = 'waiting'
             save_data(_config.moderation.data, data)
 	        end
-          return 'Please send me the group photo now'
+          return 'لطفــــا عکسی را به عنوان عکس گروه بفرستید'
         end
       -- unlock {bot|name|member|photo|sticker}
 		  elseif matches[2] == 'unlock' then
         if matches[3] == 'bot' and is_mod(msg) then
 	        if settings.lock_bots == 'no' then
-            return 'Bots are allowed to enter group.'
+            return 'میتوان ربات ها را ادد کرد.'
 	        else
             settings.lock_bots = 'no'
             save_data(_config.moderation.data, data)
-            return 'Group is open for bots.'
+            return 'قفل ادد کردن ربات غیر فعال است.'
 	        end
         elseif matches[3] == 'name' and is_mod(msg) then
 	        if settings.lock_name == 'no' then
-            return 'Group name is already unlocked'
+            return ' نام گروه قفل نیست'
 	        else
             settings.lock_name = 'no'
             save_data(_config.moderation.data, data)
-            return 'Group name has been unlocked'
+            return 'نام گروه بازاست'
 	        end
         elseif matches[3] == 'member' and is_mod(msg) then
 	        if settings.lock_member == 'no' then
-            return 'Group members are not locked'
+            return 'قفل ادد کردن ممبر فعال نیست'
 	        else
             settings.lock_member = 'no'
             save_data(_config.moderation.data, data)
-            return 'Group members has been unlocked'
+            return 'قفل ادد کردن غیر فعال شد'
 	        end
         elseif matches[3] == 'photo' and is_mod(msg) then
 	        if settings.lock_photo == 'no' then
-            return 'Group photo is not locked'
+            return 'عکس گروه قفل نیست'
 	        else
             settings.lock_photo = 'no'
             save_data(_config.moderation.data, data)
-            return 'Group photo has been unlocked'
+            return 'عکس گروه قفل نیست'
 	        end
         end
       -- view group settings
       elseif matches[2] == 'settings' and is_mod(msg) then
         if settings.lock_bots == 'yes' then
-          lock_bots_state = 'ðŸ”’'
+          lock_bots_state = '🔒'
         elseif settings.lock_bots == 'no' then
-          lock_bots_state = 'ðŸ”“'
+          lock_bots_state = '🔓'
         end
         if settings.lock_name == 'yes' then
-          lock_name_state = 'ðŸ”’'
+          lock_name_state = '🔒'
         elseif settings.lock_name == 'no' then
-          lock_name_state = 'ðŸ”“'
+          lock_name_state = '🔓'
         end
         if settings.lock_photo == 'yes' then
-          lock_photo_state = 'ðŸ”’'
+          lock_photo_state = '🔒'
         elseif settings.lock_photo == 'no' then
-          lock_photo_state = 'ðŸ”“'
+          lock_photo_state = '🔓'
         end
         if settings.lock_member == 'yes' then
-          lock_member_state = 'ðŸ”’'
+          lock_member_state = '🔒'
         elseif settings.lock_member == 'no' then
-          lock_member_state = 'ðŸ”“'
+          lock_member_state = '🔓'
         end
         if settings.anti_flood ~= 'no' then
-          antiflood_state = 'ðŸ”’'
+          antiflood_state = '🔒'
         elseif settings.anti_flood == 'no' then
-          antiflood_state = 'ðŸ”“'
+          antiflood_state = '🔓'
         end
         if settings.welcome ~= 'no' then
-          greeting_state = 'ðŸ”’'
+          greeting_state = '🔒'
         elseif settings.welcome == 'no' then
-          greeting_state = 'ðŸ”“'
+          greeting_state = '🔓'
         end
         if settings.sticker ~= 'ok' then
-          sticker_state = 'ðŸ”’'
+          sticker_state = '🔒'
         elseif settings.sticker == 'ok' then
-          sticker_state = 'ðŸ”“'
+          sticker_state = '🔓'
         end
         local text = 'Group settings:\n'
               ..'\n'..lock_bots_state..' Lock group from bot : '..settings.lock_bots
@@ -261,8 +261,8 @@ function run(msg, matches)
           settings.sticker = 'warn'
           save_data(_config.moderation.data, data)
         end
-        return 'Stickers already prohibited.\n'
-               ..'Sender will be warned first, then kicked for second violation.'
+        return 'حالت حفاظت استیکر فعال است.\n'
+               ..'به فرستنده ابتدا اخطار داده میشود در صورت تکرار حذف میشوند'
       elseif matches[2] == 'kick' then
         if settings.sticker ~= 'kick' then
           settings.sticker = 'kick'
@@ -291,7 +291,7 @@ function run(msg, matches)
         return nil
       end
 		-- set group name
-		elseif matches[1] == 'sname' and is_mod(msg) then
+		elseif matches[1] == 'setname' and is_mod(msg) then
       settings.set_name = string.gsub(matches[2], '_', ' ')
       save_data(_config.moderation.data, data)
       rename_chat(receiver, settings.set_name, ok_cb, false)
@@ -324,10 +324,10 @@ function run(msg, matches)
         if is_sticker_offender then
           chat_del_user(receiver, 'user#id'..user_id, ok_cb, true)
           redis:del(sticker_hash)
-          return 'You have been warned to not sending sticker into this group!'
+          return 'استیکر نفرستید!'
         elseif not is_sticker_offender then
           redis:set(sticker_hash, true)
-          return 'DO NOT send sticker into this group!\nThis is a WARNING, next time you will be kicked!'
+          return 'لطـــفا استیـــیکر نفرستید در غیر این صورت حذف میشوید'
         end
       elseif settings.sticker == 'kick' then
         chat_del_user(receiver, 'user#id'..user_id, ok_cb, true)
@@ -364,29 +364,29 @@ return {
   description = 'Plugin to manage group chat.',
   usage = {
     admin = {
-      '!cgp <group_name> : Make/create a new group.',
-      '!addgroup : Add group to moderation list.',
-      '!remgroup : Remove group from moderation list.'
+      '!mkgroup <group_name> : ساخت گروه جدید (ادمین)',
+      '!addgroup : افزودن گروه به لیست مدیریت.',
+      '!remgroup : حذف گروه از لیست مدیریت.'
     },
     moderator = {
-      '!group <lock|unlock> bot : {Dis}allow APIs bots.',
-      '!group <lock|unlock> member : Lock/unlock group member.',
-      '!group <lock|unlock> name : Lock/unlock group name.',
-      '!group <lock|unlock> photo : Lock/unlock group photo.',
-      '!group settings : Show group settings.',
-      '!link <set> : Generate/revoke invite link.',
-      '!setabout <description> : Set group description.',
-      '!sname <new_name> : Set group name.',
-      '!setphoto : Set group photo.',
-      '!setrules <rules> : Set group rules.',
-      '!sticker warn : Sticker restriction, sender will be warned for the first violation.',
-      '!sticker kick : Sticker restriction, sender will be kick.',
-      '!sticker ok : Disable sticker restriction.'
+      '!group <lock|unlock> bot : قفل /باز کردن ادد کردن ربات ها.',
+      '!group <lock|unlock> member : قفل/باز کردن قفل ادد کردن در گروه.',
+      '!group <lock|unlock> name : قفل/بازکردن نام گروه',
+      '!group <lock|unlock> photo : قفل/بازکردن عکس گروه.',
+      '!group settings : تنظیمات گـــــــروه.',
+      '!link <set> : لیـــنک جدید.',
+      '!setabout <description> : اضافه کردن توضیحات گروه.',
+      '!setname <new_name> : تایین نام گروه.',
+      '!setphoto : تایین عکـــس گروه.',
+      '!setrules <rules> : تایین قوانین گروه.',
+      '!sticker warn : در صورت فرستادن استیکر اول هشدار داده خواهد شد بعد در صورت تکرار حذف.',
+      '!sticker kick : در صورت فرستادن شخص بدون هشدار حذف میشود.',
+      '!sticker ok : غیر فعال کردن حفاظت استیکر.'
     },
     user = {
-      '!about : Read group description',
-      '!rules : Read group rules',
-      '!link <get> : Print invite link'
+      '!about : تــوضیحات گـــروه',
+      '!rules : قوانیــن گــروه',
+      '!link <get> : لینک فعلی گــروه'
     },
   },
   patterns = {
@@ -398,12 +398,12 @@ return {
     "^!(group) (settings)$",
     "^!(group) (unlock) (.*)$",
     "^!(link) (.*)$",
-    "^!(cgp) (.*)$",
+    "^!(mkgroup) (.*)$",
     "%[(photo)%]",
     "^!(remgroup)$",
     "^!(rules)$",
     "^!(setabout) (.*)$",
-    "^!(sname) (.*)$",F
+    "^!(setname) (.*)$",
     "^!(setphoto)$",
     "^!(setrules) (.*)$",
     "^!(sticker) (.*)$",
