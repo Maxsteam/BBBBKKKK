@@ -59,11 +59,11 @@ function run(msg, matches)
   local receiver = get_receiver(msg)
 
   -- create a group
-  if matches[1] == 'mkgroup' and matches[2] and is_admin(msg) then
+  if matches[1] == 'cgp' and matches[2] and is_admin(msg) then
     create_group_chat (msg.from.print_name, matches[2], ok_cb, false)
 	  return 'Group '..string.gsub(matches[2], '_', ' ')..' has been created.'
   -- add a group to be moderated
-  elseif matches[1] == 'addgroup' and is_admin(msg) then
+  elseif matches[1] == 'addgp' and is_admin(msg) then
     if data[tostring(msg.to.id)] then
       return 'Group is already added.'
     end
@@ -76,15 +76,15 @@ function run(msg, matches)
         lock_name = 'no',
         lock_photo = 'no',
         lock_member = 'no',
-        anti_flood = 'no',
-        welcome = 'no',
+        an = 'no',
+        wel = 'no',
         sticker = 'ok'
         }
       }
     save_data(_config.moderation.data, data)
     return 'Group has been added.'
   -- remove group from moderation
-  elseif matches[1] == 'remgroup' and is_admin(msg) then
+  elseif matches[1] == 'remgp' and is_admin(msg) then
     if not data[tostring(msg.to.id)] then
       return 'Group is not added.'
     end
@@ -111,7 +111,7 @@ function run(msg, matches)
 	    return 'Set group description to:\n'..matches[2]
     elseif matches[1] == 'about' then
       return get_description(msg, data)
-    elseif matches[1] == 'setrules' and is_mod(msg) then
+    elseif matches[1] == 'srules' and is_mod(msg) then
 	    data[tostring(msg.to.id)]['rules'] = matches[2]
 	    save_data(_config.moderation.data, data)
 	    return 'Set group rules to:\n'..matches[2]
@@ -124,13 +124,12 @@ function run(msg, matches)
       return rules
     -- group link {get|set}
     elseif matches[1] == 'link' then
-      if matches[2] == 'get' then
         if data[tostring(msg.to.id)]['link'] then
-          local about = get_description(msg, data)
+          local about = description(msg, data)
           local link = data[tostring(msg.to.id)]['link']
           return about.."\n\n"..link
         else
-          return 'Invite link does not exist.\nTry !link set to generate.'
+          return 'Invite link does not exist.\nTry !new link to generate.'
         end
       elseif matches[2] == 'set' and is_mod(msg) then
         msgr = export_chat_link(receiver, export_chat_link_cb, {data=data, msg=msg})
@@ -230,14 +229,14 @@ function run(msg, matches)
         elseif settings.lock_member == 'no' then
           lock_member_state = '🔓'
         end
-        if settings.anti_flood ~= 'no' then
+        if settings.an ~= 'no' then
           antiflood_state = '🔒'
-        elseif settings.anti_flood == 'no' then
+        elseif settings.an == 'no' then
           antiflood_state = '🔓'
         end
-        if settings.welcome ~= 'no' then
+        if settings.wel ~= 'no' then
           greeting_state = '🔒'
-        elseif settings.welcome == 'no' then
+        elseif settings.wel == 'no' then
           greeting_state = '🔓'
         end
         if settings.sticker ~= 'ok' then
@@ -250,15 +249,15 @@ function run(msg, matches)
               ..'\n'..lock_name_state..' Lock group name : '..settings.lock_name
               ..'\n'..lock_photo_state..' Lock group photo : '..settings.lock_photo
               ..'\n'..lock_member_state..' Lock group member : '..settings.lock_member
-              ..'\n'..antiflood_state..' Flood protection : '..settings.anti_flood
-              ..'\n'..greeting_state..' Welcome message : '..settings.welcome
+              ..'\n'..antiflood_state..' Flood protection : '..settings.an
+              ..'\n'..greeting_state..' wel message : '..settings.wel
               ..'\n'..sticker_state..' Sticker policy : '..settings.sticker
         return text
 		  end
     elseif matches[1] == 'sticker' then
-      if matches[2] == 'warn' then
-        if settings.sticker ~= 'warn' then
-          settings.sticker = 'warn'
+      if matches[2] == 'wn' then
+        if settings.sticker ~= 'wn' then
+          settings.sticker = 'wn'
           save_data(_config.moderation.data, data)
         end
         return 'Stickers already prohibited.\n'
@@ -291,12 +290,12 @@ function run(msg, matches)
         return nil
       end
 		-- set group name
-		elseif matches[1] == 'setname' and is_mod(msg) then
+		elseif matches[1] == 'sname' and is_mod(msg) then
       settings.set_name = string.gsub(matches[2], '_', ' ')
       save_data(_config.moderation.data, data)
       rename_chat(receiver, settings.set_name, ok_cb, false)
 		-- set group photo
-		elseif matches[1] == 'setphoto' and is_mod(msg) then
+		elseif matches[1] == 'sphoto' and is_mod(msg) then
       settings.set_photo = 'waiting'
       save_data(_config.moderation.data, data)
       return 'Please send me new group photo now'
@@ -320,14 +319,14 @@ function run(msg, matches)
       local chat_id = msg.to.id
       local sticker_hash = 'mer_sticker:'..chat_id..':'..user_id
       local is_sticker_offender = redis:get(sticker_hash)
-      if settings.sticker == 'warn' then
+      if settings.sticker == 'wn' then
         if is_sticker_offender then
           chat_del_user(receiver, 'user#id'..user_id, ok_cb, true)
           redis:del(sticker_hash)
-          return 'You have been warned to not sending sticker into this group!'
+          return 'You have been wned to not sending sticker into this group!'
         elseif not is_sticker_offender then
           redis:set(sticker_hash, true)
-          return 'DO NOT send sticker into this group!\nThis is a WARNING, next time you will be kicked!'
+          return 'DO NOT send sticker into this group!\nThis is a wnING, next time you will be kicked!'
         end
       elseif settings.sticker == 'kick' then
         chat_del_user(receiver, 'user#id'..user_id, ok_cb, true)
@@ -364,9 +363,9 @@ return {
   description = 'Plugin to manage group chat.',
   usage = {
     admin = {
-      '!mkgroup <group_name> : Make/create a new group.',
-      '!addgroup : Add group to moderation list.',
-      '!remgroup : Remove group from moderation list.'
+      '!cgp <group_name> : create a new group.',
+      '!addgp : Add group to moderation list.',
+      '!remgp : Remove group from moderation list.'
     },
     moderator = {
       '!group <lock|unlock> bot : {Dis}allow APIs bots.',
@@ -374,38 +373,38 @@ return {
       '!group <lock|unlock> name : Lock/unlock group name.',
       '!group <lock|unlock> photo : Lock/unlock group photo.',
       '!group settings : Show group settings.',
-      '!link <set> : Generate/revoke invite link.',
+      '!new link : Generate/revoke invite link.',
       '!setabout <description> : Set group description.',
-      '!setname <new_name> : Set group name.',
-      '!setphoto : Set group photo.',
-      '!setrules <rules> : Set group rules.',
-      '!sticker warn : Sticker restriction, sender will be warned for the first violation.',
+      '!sname <new_name> : Set group name.',
+      '!sphoto : Set group photo.',
+      '!srules <rules> : Set group rules.',
+      '!sticker wn : Sticker restriction, sender will be wned for the first violation.',
       '!sticker kick : Sticker restriction, sender will be kick.',
       '!sticker ok : Disable sticker restriction.'
     },
     user = {
       '!about : Read group description',
       '!rules : Read group rules',
-      '!link <get> : Print invite link'
+      '!link : Print invite link'
     },
   },
   patterns = {
     "^!(about)$",
-    "^!(addgroup)$",
+    "^!(addgp)$",
     "%[(audio)%]",
     "%[(document)%]",
     "^!(group) (lock) (.*)$",
     "^!(group) (settings)$",
     "^!(group) (unlock) (.*)$",
     "^!(link) (.*)$",
-    "^!(mkgroup) (.*)$",
+    "^!(cgp) (.*)$",
     "%[(photo)%]",
-    "^!(remgroup)$",
+    "^!(remgp)$",
     "^!(rules)$",
     "^!(setabout) (.*)$",
-    "^!(setname) (.*)$",
-    "^!(setphoto)$",
-    "^!(setrules) (.*)$",
+    "^!(sname) (.*)$",
+    "^!(sphoto)$",
+    "^!(srules) (.*)$",
     "^!(sticker) (.*)$",
     "^!!tgservice (.+)$",
     "%[(video)%]"
