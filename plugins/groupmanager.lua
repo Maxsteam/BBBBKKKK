@@ -77,7 +77,7 @@ function run(msg, matches)
         lock_photo = 'no',
         lock_member = 'no',
         an = 'no',
-        wel = 'no',
+        welcome = 'no',
         sticker = 'ok'
         }
       }
@@ -230,13 +230,13 @@ function run(msg, matches)
           lock_member_state = '🔓'
         end
         if settings.an ~= 'no' then
-          antiflood_state = '🔒'
+          an_state = '🔒'
         elseif settings.an == 'no' then
-          antiflood_state = '🔓'
+          an_state = '🔓'
         end
-        if settings.wel ~= 'no' then
+        if settings.welcome ~= 'no' then
           greeting_state = '🔒'
-        elseif settings.wel == 'no' then
+        elseif settings.welcome == 'no' then
           greeting_state = '🔓'
         end
         if settings.sticker ~= 'ok' then
@@ -249,8 +249,8 @@ function run(msg, matches)
               ..'\n'..lock_name_state..' Lock group name : '..settings.lock_name
               ..'\n'..lock_photo_state..' Lock group photo : '..settings.lock_photo
               ..'\n'..lock_member_state..' Lock group member : '..settings.lock_member
-              ..'\n'..antiflood_state..' Flood protection : '..settings.an
-              ..'\n'..greeting_state..' wel message : '..settings.wel
+              ..'\n'..an_state..' Flood protection : '..settings.an
+              ..'\n'..greeting_state..' welcome message : '..settings.welcome
               ..'\n'..sticker_state..' Sticker policy : '..settings.sticker
         return text
 		  end
