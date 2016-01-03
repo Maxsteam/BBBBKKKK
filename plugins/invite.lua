@@ -18,7 +18,7 @@ do
     if success == 1 and extra ~= false then
       return extra.text
     else
-      return send_large_msg(chat, "Can't invite user to this group.")
+      return send_large_msg(chat, "Can't inv user to this group.")
     end
   end
 
@@ -27,7 +27,7 @@ do
       chat_add_user(extra.chat, 'user#id'..result.id, callback, false)
       return extra.text
     else
-      return send_large_msg(extra.chat, "Can't invite user to this group.")
+      return send_large_msg(extra.chat, "Can't inv user to this group.")
     end
   end
 
@@ -35,7 +35,7 @@ do
     if success == 1 then
       chat_add_user('chat#id'..result.to.id, 'user#id'..result.from.id, callback, false)
     else
-      return send_large_msg('chat#id'..result.to.id, "Can't invite user to this group.")
+      return send_large_msg('chat#id'..result.to.id, "Can't inv user to this group.")
     end
   end
 
@@ -43,7 +43,7 @@ do
     local receiver = get_receiver(msg)
     local text = "Add: "..matches[1].." to "..receiver
     if is_chat_msg(msg) then
-      if msg.reply_id and msg.text == "!invite" then
+      if msg.reply_id and msg.text == "!inv" then
         msgr = get_message(msg.reply_id, action_by_reply, {msg=msg})
       end
       if string.match(matches[1], '^%d+$') then
@@ -59,14 +59,21 @@ do
   end
 
   return {
-    description = 'Invite other user to the chat group.',
+    description = 'inv other user to the chat group.',
     usage = {
       -- Need space in front of this, so bot won't consider it as a command
-      ' !invite [id|user_name|name]'
+      ' !inv [id|user_name|name]'
     },
     patterns = {
-      "^!invite$",
-      "^!invite (.*)$",
+      "^!inv$",
+      "^!inv (.*)$",
+      "^!inv (%d+)$"
+    },
+    run = run,
+    moderated = true
+  }
+
+end
       "^!invite (%d+)$"
     },
     run = run,
